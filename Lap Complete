@@ -1,0 +1,175 @@
+using UnityEngine;
+using TMPro;
+public class LapComplete : MonoBehaviour
+{
+    //GameObject Variables
+    public GameObject LapCompleteTrig;
+    public GameObject HalfLapTrig;
+    public GameObject RaceFinish;
+    
+
+    //TMP_Text Variables
+    public TMP_Text MinuteDisplay;
+    public TMP_Text SecondDisplay;
+    public TMP_Text MilliDisplay;
+    public TextMeshProUGUI TimeMinuteDisplay;
+    public TextMeshProUGUI TimeSecondDisplay;
+    public TextMeshProUGUI TimeMilliDisplay;
+    public TMP_Text LapTimeBox;
+    public TMP_Text LapCounter;
+
+    //Int/float Variables
+    public static int LapsDone;
+    public float RawTime;
+    public float TimeModeRawTime;
+
+    private float bronzePoints = 1f;
+    private float silverPoints = 3f;
+    private float goldPoints = 5f; 
+
+    public LeaderboardManager LeaderboardManager;
+    private void Update()
+    {
+        //Activates the RaceFinish script if the player completes 3 laps 
+        if (LapsDone == 3)
+        {
+            RaceFinish.SetActive(true);
+        }
+    }
+
+   public void PlayerCompletedLap(string teamName, float points)
+   {
+        Debug.Log("Updating Leaderboard"); 
+        LeaderboardManager.UpdateLeaderboard();
+   }
+    void OnTriggerEnter(Collider other)
+    {
+        if (TimeMode.isTimeMode == true)
+        {
+            Debug.Log("Time Mode = True");
+            if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("LongNess") || other.gameObject.CompareTag("ironBro"))
+            {
+                //Adds a lap to LapsDone and stores the RawTime value 
+                LapsDone += 1;
+                TimeModeRawTime = PlayerPrefs.GetFloat("RawTime");
+              
+                //Checks if TimeModeTimeMangers RawTime variable is less than or equal to LapCompletes RawTime
+                if (TimeModeTimeManager.RawTime <= TimeModeRawTime)
+                {
+                    //Stores the minutes, seconds and milliseconds of the time taken to complete the lap 
+                    if (TimeModeTimeManager.SecondCount <= 9)
+                    {
+                        TimeSecondDisplay.GetComponent<TextMeshProUGUI>().text = "   " + TimeModeTimeManager.SecondCount + ".";
+                    }
+                    else
+                    {
+                        TimeSecondDisplay.GetComponent<TextMeshProUGUI>().text = "   " + TimeModeTimeManager.SecondCount + ".";
+                    }
+
+                    if (TimeModeTimeManager.MinuteCount <= 9)
+                    {
+                        TimeMinuteDisplay.GetComponent<TextMeshProUGUI>().text = "   " + TimeModeTimeManager.MinuteCount + ".";
+                    }
+                    else
+                    {
+                        TimeMinuteDisplay.GetComponent<TextMeshProUGUI>().text = "   " + TimeModeTimeManager.MinuteCount + ".";
+                    }
+
+                    TimeMilliDisplay.GetComponent<TextMeshProUGUI>().text = "   " + TimeModeTimeManager.MilliCount;
+                }
+                //Saves the minutes, seconds, and milliseconds of the lap 
+                PlayerPrefs.SetInt("MinSave", TimeModeTimeManager.MinuteCount);
+                PlayerPrefs.SetInt("SecSave", TimeModeTimeManager.SecondCount);
+                PlayerPrefs.SetFloat("MilliSave", TimeModeTimeManager.MilliCount);
+                PlayerPrefs.SetFloat("RawTime", TimeModeTimeManager.RawTime);
+                Debug.Log("SecSave " + TimeModeTimeManager.SecondCount);
+
+                //Sets all the times to 0 and changes the amount of laps done 
+                TimeModeTimeManager.MinuteCount = 0;
+                TimeModeTimeManager.SecondCount = 0;
+                TimeModeTimeManager.MilliCount = 0;
+                TimeModeTimeManager.RawTime = 0;
+
+                if (TimeModeRawTime > 120)
+                {
+                    Debug.Log("Bronze reward");
+                    LeaderboardManager.teamPoints[0] += bronzePoints; 
+                    PlayerCompletedLap(LeaderboardManager.teamName[0], LeaderboardManager.teamPoints[0]);
+                }
+
+                if(TimeModeRawTime > 90 && TimeModeRawTime < 120)
+                {
+                    Debug.Log("Silver reward");
+                    LeaderboardManager.teamPoints[0] += silverPoints;
+                    PlayerCompletedLap(LeaderboardManager.teamName[0], LeaderboardManager.teamPoints[0]);
+                }
+                
+                if(TimeModeRawTime < 90)
+                {
+                    Debug.Log("Gold reward");
+                    LeaderboardManager.teamPoints[0] += goldPoints;
+                    PlayerCompletedLap(LeaderboardManager.teamName[0], LeaderboardManager.teamPoints[0]);
+                }
+
+                //Turns off lap complete trigger and turns halfpointtrigger back on 
+                HalfLapTrig.SetActive(true);
+                LapCompleteTrig.SetActive(false);
+            }
+        }
+                
+                if (TimeMode.isTimeMode == false)
+                {
+                    Debug.Log("TimeMode = false");
+                    //Checks if any of the vehichles have passed through 
+                    if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("LongNess") || other.gameObject.CompareTag("ironBro"))
+                    {
+                        //Adds a lap to LapsDone and stores the RawTime value 
+                        LapsDone += 1;
+                        RawTime = PlayerPrefs.GetFloat("RawTime");
+
+                        //Checks if LapTimeMangers RawTime variable is less than or equal to LapCompletes RawTime
+                        if (LapTimeManager.RawTime <= RawTime)
+                        {
+                            //Stores the minutes, seconds and milliseconds of the time taken to complete the lap 
+                            if (LapTimeManager.SecondCount <= 9)
+                            {
+                                SecondDisplay.GetComponent<TMP_Text>().text = "   " + LapTimeManager.SecondCount + ".";
+                            }
+                            else
+                            {
+                                SecondDisplay.GetComponent<TMP_Text>().text = "   " + LapTimeManager.SecondCount + ".";
+                            }
+
+                            if (LapTimeManager.MinuteCount <= 9)
+                            {
+                                MinuteDisplay.GetComponent<TMP_Text>().text = "   " + LapTimeManager.MinuteCount + ".";
+                            }
+                            else
+                            {
+                                MinuteDisplay.GetComponent<TMP_Text>().text = "   " + LapTimeManager.MinuteCount + ".";
+                            }
+
+                            MilliDisplay.GetComponent<TMP_Text>().text = "   " + LapTimeManager.MilliCount;
+                        }
+
+                        //Saves the minutes, seconds, and milliseconds of the lap 
+                        PlayerPrefs.SetInt("MinSave", LapTimeManager.MinuteCount);
+                        PlayerPrefs.SetInt("SecSave", LapTimeManager.SecondCount);
+                        PlayerPrefs.SetFloat("MilliSave", LapTimeManager.MilliCount);
+                        PlayerPrefs.SetFloat("RawTime", LapTimeManager.RawTime);
+
+                        //Sets all the times to 0 and changes the amount of laps done 
+                        LapTimeManager.MinuteCount = 0;
+                        LapTimeManager.SecondCount = 0;
+                        LapTimeManager.MilliCount = 0;
+                        LapTimeManager.RawTime = 0;
+                        LapCounter.GetComponent<TMP_Text>().text = "" + LapsDone;
+
+                        //Turns off lap complete trigger and turns halfpointtrigger back on 
+                        HalfLapTrig.SetActive(true);
+                        LapCompleteTrig.SetActive(false);
+                    }
+                }
+            }
+        }
+    
