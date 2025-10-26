@@ -1,0 +1,17 @@
+[System.Serializable]
+public class LeaderBoard
+{
+    //Variables
+    public string teamName;
+    public float Points;
+
+    //Creates a Leaderboard function and passes through a string and float variable
+    public LeaderBoard(string name, float points)
+    {
+        //Sets the teamName to the name string variable that is passed through 
+        teamName = name;
+
+        //Collects the points from the points float variable that is passed through 
+        Points = points;
+    }
+}
