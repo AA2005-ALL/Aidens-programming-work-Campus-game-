@@ -1,0 +1,120 @@
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+public class LeaderboardManager : MonoBehaviour
+{
+    [Header("Current leaderboard entries")]
+    private LeaderBoard leaderboard;
+    public List<LeaderBoard> leaderboardEntries = new List<LeaderBoard>();
+
+    [Header("Text Arrays")]
+    [SerializeField] public TextMeshProUGUI[] teamNameTexts;
+    [SerializeField] public TextMeshProUGUI[] teamPointsTexts;
+
+ 
+    [Header("Team names + Points")]
+    public string[] teamName = new string[] { "Team 1: ", "Team 2: ", "Team 3: " };
+    public float[] teamPoints;
+
+    [Header("Max entry amount")]
+    public int maxEntries = 10;
+
+    private void Awake()
+    {
+        //Sets the team points to 0 to begin with 
+        teamPoints = new float[] { 0, 0, 0 };
+
+        //Loops through every team name and their point tally 
+        for (int i = 0; i < teamName.Length && i < teamPoints.Length; i++)
+        {
+            //Adds each team
+            AddEntry(teamName[i], teamPoints[i]);
+        }
+
+        UpdateLeaderboard();
+        //Saves the PlayerPrefs 
+        //PlayerPrefs.Save();
+    }
+
+    void Start()
+    {
+        //Displays the starting leaderboard in Unity
+        DisplayLeaderboardEntries();
+    }
+
+    // Adds a new entry to the leaderboard
+    public void AddEntry(string teamName, float points)
+    {
+        leaderboardEntries.Add(new LeaderBoard(teamName, points));
+
+        //Sorts entries in the correct order by highest points tally
+        leaderboardEntries.Sort((x, y) => y.Points.CompareTo(x.Points));
+
+        //Checks if the leaderboard entries has reached it's maximum amount
+        if (leaderboardEntries.Count > maxEntries)
+        {
+            //Removes the bottom entry in the leaderboard 
+            leaderboardEntries.RemoveAt(leaderboardEntries.Count - 1);
+        }
+    }
+
+    // Gets the top entries from the leaderboard
+    public List<LeaderBoard> GetTopEntries(int count)
+    {
+        //Creates a new list of leaderboard entries called topEntries 
+        List<LeaderBoard> topEntries = new List<LeaderBoard>();
+
+        int numEntries = Mathf.Min(count, leaderboardEntries.Count);
+
+        //Loops through every entry 
+        for (int i = 0; i < numEntries; i++)
+        {
+            topEntries.Add(leaderboardEntries[i]);
+        }
+
+        return topEntries;
+    }
+
+    public void DisplayLeaderboardEntries()
+    {
+        //Loops through each entry in the entries list 
+        for (int i = 0; i < leaderboardEntries.Count; i++)
+        {
+            //Checks that the teamNames and TeamPoints array length hasn't been surpassed 
+            if (i < teamNameTexts.Length && i < teamPointsTexts.Length)
+            {
+                teamNameTexts[i].text = leaderboardEntries[i].teamName;
+ 
+                teamPointsTexts[i].text = leaderboardEntries[i].Points.ToString();
+            }
+        }
+    }
+
+    public void UpdateLeaderboard()
+    {
+        //Removes all entries from the leaderboard
+        leaderboardEntries.Clear();
+
+        //Loops through each teamName and their points tally 
+        for (int i = 0; i < teamName.Length && i < teamPoints.Length; i++)
+        {
+            leaderboardEntries.Add(new LeaderBoard(teamName[i], teamPoints[i]));
+        }
+
+        //Sorts entries in the correct order by highest points tally
+        leaderboardEntries.Sort((x, y) => y.Points.CompareTo(x.Points));
+
+        //Checks if the leaderboard entries has reached it's maximum amount
+        if (leaderboardEntries.Count > maxEntries)
+        {
+            //Removes the bottom entry in the leaderboard 
+            leaderboardEntries.RemoveAt(leaderboardEntries.Count - 1);
+        }
+
+        //Displays the new order of entries
+        DisplayLeaderboardEntries();
+    }
+
+}
+
